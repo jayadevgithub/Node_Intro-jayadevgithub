@@ -17,8 +17,15 @@ NOTES: 		1) All the properties of the contact (firstName, lastName, phone) can h
 			2) A straight-forward approach of just appending contact object to the file alone may not work. You
 			   need to think of how read contact(s) will be implemented as well to ensure both Add/Read will work.
 */
-exports.AddContact = function(filename, contact){
+function RefreshContacts(listOfContacts, filename) {
+	var newContacts = JSON.stringify(listOfContacts);
+	fs.writeFileSync(filename, newContacts);
+}
 
+exports.AddContact = function(filename, contact) {
+	var listOfContacts=exports.ReadContacts(filename);
+	listOfContacts.push(contact);
+	RefreshContacts(listOfContacts, filename);
 }
 
 /*
@@ -33,7 +40,15 @@ NOTES: 		1) All the properties of the contact (firstName, lastName, phone) can h
 */
 
 exports.ReadContacts = function(filename){
-
+	var listOfContacts = new Array();
+	var contactsAsString = fs.readFileSync(filename,"utf8");
+	if(!contactsAsString == ""){
+		var contactsAsJSON = JSON.parse(contactsAsString);
+		for(var i=0; i<contactsAsJSON.length;i++){
+			listOfContacts.push(contactsAsJSON[i]);
+		}
+	}
+	return listOfContacts;
 }
 
 /*
@@ -50,7 +65,13 @@ NOTES: 		You need to only come up with a functionally correct solution and it do
 
 */
 exports.UpdateContact = function(filename, contactname, newPhoneNumber){
-
+	var listOfContacts = exports.ReadContacts(filename);
+	for(var contact in listOfContacts){
+		if(listOfContacts[contact].firstName==contactname){
+			listOfContacts[contact].phone=newPhoneNumber;
+		}
+	}
+	RefreshContacts(listOfContacts, filename);
 }
 
 /*
@@ -66,6 +87,11 @@ NOTES: 		You need to only come up with a functionally correct solution and it do
 
 */
 exports.DeleteContact = function(filename, contactname){
-
+	var listOfContacts = exports.ReadContacts(filename);
+	for(var contact in listOfContacts){
+		if(listOfContacts[contact].firstName==contactname){
+			listOfContacts.splice(contact,1);
+		}
+	}
+	RefreshContacts(listOfContacts, filename);
 }
-
